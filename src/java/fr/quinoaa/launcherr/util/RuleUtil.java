@@ -30,7 +30,6 @@ import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class RuleUtil {
 
@@ -43,11 +42,16 @@ public class RuleUtil {
         for(JsonElement el : rules){
             JsonObject obj = el.getAsJsonObject();
 
-            boolean apply;
+            boolean apply = true;
             if(obj.has("os")){
-                apply = OsUtil.getOs().equals(obj.getAsJsonObject("os").get("name").getAsString());
-            }else{
-                apply = true;
+                JsonObject os = obj.getAsJsonObject("os");
+
+                if(os.has("name")){
+                    apply = apply && OsUtil.getOs().equalsIgnoreCase(os.get("name").getAsString());
+                }
+                if(os.has("arch")){
+                    apply = apply && OsUtil.getArch().equalsIgnoreCase(os.get("arch").getAsString());
+                }
             }
 
             if(obj.has("features") && apply){

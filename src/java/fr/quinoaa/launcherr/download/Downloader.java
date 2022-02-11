@@ -24,7 +24,7 @@
 
 package fr.quinoaa.launcherr.download;
 
-import fr.quinoaa.launcherr.resource.Resource;
+import fr.quinoaa.launcherr.resource.DownloadResource;
 import org.apache.http.client.fluent.Request;
 
 import java.io.IOException;
@@ -33,13 +33,12 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Logger;
 
 public class Downloader {
-    Resource[] resources;
-    BlockingQueue<Resource> queue;
+    DownloadResource[] resources;
+    BlockingQueue<DownloadResource> queue;
 
-    public Downloader(Resource... resources){
+    public Downloader(DownloadResource... resources){
         this.resources = resources;
 
         if(resources.length == 0){
@@ -51,13 +50,15 @@ public class Downloader {
     }
 
     public void download(Path root) throws IOException {
-        Resource res;
+        DownloadResource res;
         while((res = queue.poll()) != null){
+            if(res.url==null) continue;
             Path path = res.getPath(root);
             if(!Files.exists(path)){
                 Files.createDirectories(path.getParent());
                 Files.createFile(path);
             }
+
             if(!res.isValid(root)){
                 Request.Get(res.url).execute().saveContent(res.getPath(root).toFile());
             }

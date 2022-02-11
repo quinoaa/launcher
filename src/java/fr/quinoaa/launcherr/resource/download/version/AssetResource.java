@@ -22,40 +22,26 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource.version;
+package fr.quinoaa.launcherr.resource.download.version;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.Resource;
+import fr.quinoaa.launcherr.resource.DownloadResource;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
-public class ClassifierResource extends Resource {
-    List<String> excludes = new ArrayList<>();
-
-    public ClassifierResource(JsonObject parent, JsonObject download, String name) {
-        super(download.get("url").getAsString(),
-                download.get("sha1").getAsString(),
-                Paths.get("libraries", download.get("path").getAsString()),
-                download.get("size").getAsLong());
-
-        if(!parent.has("extract")) return;
-        JsonObject extract = parent.getAsJsonObject("extract");
-
-        if(extract.has("exclude")){
-            for(JsonElement el : extract.getAsJsonArray("exclude")){
-                excludes.add(el.getAsString());
-            }
-        }
+public class AssetResource extends DownloadResource {
+    public AssetResource(JsonObject obj){
+        super(getUrl(obj), obj.get("hash").getAsString(), getPath(obj), obj.get("size").getAsLong());
     }
 
-    public boolean shouldExtract(String path){
-        for(String start : excludes){
-            if(path.startsWith(start)) return false;
-        }
-        return true;
+    static final String base = "http://resources.download.minecraft.net";
+    private static String getUrl(JsonObject obj){
+        String hash = obj.get("hash").getAsString();
+        return String.join("/", base, hash.substring(0, 2), hash);
+    }
+    private static Path getPath(JsonObject obj){
+        String hash = obj.get("hash").getAsString();
+        return Paths.get("assets", "objects", hash.substring(0, 2), hash);
     }
 }

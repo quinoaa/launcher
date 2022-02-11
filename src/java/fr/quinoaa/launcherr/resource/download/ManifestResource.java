@@ -22,46 +22,35 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource.version;
+package fr.quinoaa.launcherr.resource.download;
 
-import com.google.gson.JsonObject;
+import fr.quinoaa.launcherr.data.LauncherData;
 import fr.quinoaa.launcherr.data.Provider;
-import fr.quinoaa.launcherr.data.version.VersionData;
-import fr.quinoaa.launcherr.resource.JsonResource;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class VersionResource extends JsonResource<VersionData> {
-    public final String id;
+public class ManifestResource extends JsonResource<LauncherData> {
+    public static final String MANIFEST_URI = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 
-    public final int compliance;
-
-    public final String type;
-
-    public final String date_release;
-    public final String date_update;
-
-    public VersionResource(JsonObject json) {
-        super(json.get("url").getAsString(),
-                json.get("sha1").getAsString(),
-                getPath(json),
-                -1);
-
-        id = json.get("id").getAsString();
-        compliance = json.get("complianceLevel").getAsInt();
-        type = json.get("type").getAsString();
-        date_release = json.get("releaseTime").getAsString();
-        date_update = json.get("time").getAsString();
+    public ManifestResource() {
+        super(MANIFEST_URI, null, Paths.get("launcher_manifest_v2.json"), -1);
     }
 
-    private static Path getPath(JsonObject json){
-        String version = json.get("id").getAsString();
-        return Paths.get("versions", version, version + ".json");
+    long expire = 1000 * 60 * 10;
+    @Override
+    public boolean isValid(Path root) throws IOException {
+        long age = System.currentTimeMillis() - Files.getLastModifiedTime(getPath(root)).toMillis();
+        if(age < 0) return false;
+
+        return age < expire;
     }
+
 
     @Override
-    public Provider getReader() {
-        return VersionData::new;
+    public Provider<LauncherData> getReader() {
+        return LauncherData::new;
     }
 }

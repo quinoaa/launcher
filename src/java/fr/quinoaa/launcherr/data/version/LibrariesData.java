@@ -27,22 +27,25 @@ package fr.quinoaa.launcherr.data.version;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.version.ArtifactResource;
-import fr.quinoaa.launcherr.resource.version.ClassifierResource;
+import fr.quinoaa.launcherr.resource.download.version.ArtifactResource;
+import fr.quinoaa.launcherr.resource.download.version.ClassifierResource;
+import fr.quinoaa.launcherr.resource.extract.NativeResource;
 import fr.quinoaa.launcherr.util.OsUtil;
 import fr.quinoaa.launcherr.util.RuleUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class LibrariesData {
     public final ArtifactResource[] artifacts;
     public final ClassifierResource[] classifiers;
 
+    public final NativeResource[] natives;
+
     public LibrariesData(JsonArray list){
         List<ArtifactResource> artifacts = new ArrayList<>();
         List<ClassifierResource> classifiers = new ArrayList<>();
+        List<NativeResource> natives = new ArrayList<>();
 
         for(JsonElement el : list) {
             JsonObject obj = el.getAsJsonObject();
@@ -66,12 +69,24 @@ public class LibrariesData {
                 String name = OsUtil.format(names.get(OsUtil.getOs()).getAsString());
 
                 JsonObject classifier = download.getAsJsonObject("classifiers").getAsJsonObject(name);
-                classifiers.add(new ClassifierResource(obj, classifier, name));
+                ClassifierResource classifierResource = new ClassifierResource(obj, classifier, name);
+                classifiers.add(classifierResource);
 
+                List<String> excludelist = new ArrayList<>();
+                if(obj.has("extract")){
+                    JsonObject extract = obj.getAsJsonObject("extract");
+
+                    if(extract.has("exclude")){
+                        JsonArray excludes = extract.getAsJsonArray("exclude");
+                        for(JsonElement exclude : excludes) excludelist.add(exclude.getAsString());
+                    }
+                }
+                natives.add(new NativeResource(classifierResource, excludelist.toArray(new String[0])));
             }
         }
 
         this.artifacts = artifacts.toArray(new ArtifactResource[0]);
         this.classifiers = classifiers.toArray(new ClassifierResource[0]);
+        this.natives = natives.toArray(new NativeResource[0]);
     }
 }

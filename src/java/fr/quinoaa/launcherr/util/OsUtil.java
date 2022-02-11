@@ -37,6 +37,10 @@ public class OsUtil {
         }
     }
 
+    public static char getJarSeparator(){
+        return getOs().equalsIgnoreCase("windows") ? ';' : ':';
+    }
+
     public static String getArch(){
         if(System.getProperty("os.arch").contains("64")) return "64";
         return "32";

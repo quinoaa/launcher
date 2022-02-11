@@ -22,23 +22,14 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.data.version;
+package fr.quinoaa.launcherr.resource.download.version;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.download.version.AssetResource;
+import fr.quinoaa.launcherr.resource.Resource;
 
-public class AssetIndexData {
-    public AssetResource[] assets;
-    private int i = 0;
+import java.nio.file.Paths;
 
-    public AssetIndexData(JsonElement el){
-        JsonObject base = el.getAsJsonObject().getAsJsonObject("objects");
-        assets = new AssetResource[base.size()];
-
-        base.entrySet().forEach(entry ->{
-            assets[i] = new AssetResource(entry.getValue().getAsJsonObject());
-            i++;
-        });
+public class AssetFolder extends Resource {
+    public AssetFolder(String name) {
+        super(Paths.get(name));
     }
 }

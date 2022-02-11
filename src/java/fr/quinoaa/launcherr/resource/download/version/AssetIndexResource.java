@@ -22,19 +22,43 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource.version;
+package fr.quinoaa.launcherr.resource.download.version;
 
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.Resource;
+import fr.quinoaa.launcherr.data.Provider;
+import fr.quinoaa.launcherr.data.version.AssetIndexData;
+import fr.quinoaa.launcherr.resource.download.JsonResource;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ArtifactResource extends Resource {
+public class AssetIndexResource extends JsonResource<AssetIndexData> {
+    public final String id;
+    public final long totalsize;
 
-    public ArtifactResource(JsonObject obj) {
+    public final AssetFolder assetFolder;
+
+    public AssetIndexResource(JsonObject obj){
+        this(obj, "assets");
+    }
+
+    public AssetIndexResource(JsonObject obj, String assetsname){
         super(obj.get("url").getAsString(),
                 obj.get("sha1").getAsString(),
-                Paths.get("libraries", obj.get("path").getAsString()),
+                generatePath(obj, assetsname),
                 obj.get("size").getAsLong());
+
+        id = obj.get("id").getAsString();
+        totalsize = obj.get("totalSize").getAsLong();
+        assetFolder = new AssetFolder(assetsname);
+    }
+
+    private static Path generatePath(JsonObject obj, String assetsname){
+        return Paths.get(assetsname, "indexes", obj.get("id").getAsString() + ".json");
+    }
+
+    @Override
+    public Provider<AssetIndexData> getReader() {
+        return AssetIndexData::new;
     }
 }

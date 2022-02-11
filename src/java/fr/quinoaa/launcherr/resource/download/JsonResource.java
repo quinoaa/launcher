@@ -22,42 +22,31 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.data;
+package fr.quinoaa.launcherr.resource.download;
 
-import com.google.gson.JsonArray;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.download.version.VersionResource;
+import fr.quinoaa.launcherr.data.Provider;
+import fr.quinoaa.launcherr.resource.DownloadResource;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class LauncherData {
-    public static final String TYPE_ALPHA = "old_alpha";
-    public static final String TYPE_BETA = "old_beta";
-    public static final String TYPE_RELEASE = "release";
-    public static final String TYPE_SNAPSHOT = "snapshot";
-
-    public JsonObject json;
-
-    public Set<String> types = new HashSet<>();
-
-    List<VersionResource> versions = new ArrayList<>();
-
-    public LauncherData(JsonElement el) throws IOException {
-        JsonArray arr = el.getAsJsonObject().getAsJsonArray("versions");
-        arr.forEach(ver -> versions.add(new VersionResource(ver.getAsJsonObject())));
+public abstract class JsonResource<T> extends DownloadResource {
+    public JsonResource(String url, String hash, Path relative, long size) {
+        super(url, hash, relative, size);
     }
 
-    public VersionResource getVersion(String id){
-        for(VersionResource res : versions){
-            if(res.id.equals(id)){
-                return res;
-            }
-        }
-        return null;
+    public abstract Provider<T> getReader();
+
+    public T read(Path root) throws IOException {
+        Reader reader = new InputStreamReader(Files.newInputStream(getPath(root)));
+        JsonElement json = new Gson().fromJson(reader, JsonObject.class);
+        return getReader().read(json);
     }
+
 }

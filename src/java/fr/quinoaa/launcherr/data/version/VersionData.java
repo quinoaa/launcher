@@ -26,17 +26,41 @@ package fr.quinoaa.launcherr.data.version;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.version.AssetIndexResource;
+import fr.quinoaa.launcherr.launch.LaunchData;
+import fr.quinoaa.launcherr.resource.download.version.AssetIndexResource;
+import fr.quinoaa.launcherr.resource.download.version.ClientResource;
 
 public class VersionData {
+    public final String id;
 
-    public final AssetIndexResource assets;
+    public AssetIndexResource assets = null;
+    public LibrariesData libraries = null;
+    public ClientResource client = null;
 
-    public final LibrariesData libraries;
+    public LaunchData launchData;
+
+    public String type = null;
 
     public VersionData(JsonElement jsonElement) {
         JsonObject base = jsonElement.getAsJsonObject();
-        assets = new AssetIndexResource(base.getAsJsonObject("assetIndex"));
-        libraries = new LibrariesData(base.getAsJsonArray("libraries"));
+
+        id = base.get("id").getAsString();
+        launchData = LaunchData.get(base);
+
+        if(base.has("assets"))
+            assets = new AssetIndexResource(base.getAsJsonObject("assetIndex"));
+
+        if(base.has("libraries"))
+            libraries = new LibrariesData(base.getAsJsonArray("libraries"));
+
+        if(base.has("downloads")){
+            JsonObject downloads = base.getAsJsonObject("downloads");
+
+            if(downloads.has("client"))
+                client = new ClientResource(id, downloads.getAsJsonObject("client"));
+        }
+        if(base.has("type")){
+            type = base.get("type").getAsString();
+        }
     }
 }

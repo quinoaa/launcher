@@ -22,42 +22,28 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.data;
+package fr.quinoaa.launcherr.launch;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.download.version.VersionResource;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+public class LaunchParameters implements LaunchWrapper.ParameterProvider {
+    Map<String, String> params = new HashMap<>();
 
-public class LauncherData {
-    public static final String TYPE_ALPHA = "old_alpha";
-    public static final String TYPE_BETA = "old_beta";
-    public static final String TYPE_RELEASE = "release";
-    public static final String TYPE_SNAPSHOT = "snapshot";
+    @Override
+    public String replaceArgument(String value) {
+        String result = value;
+        if(result.contains("${")&&result.contains("}")){
+            int startindex = result.indexOf("${");
+            int endindex = result.indexOf("}");
+            String key = result.substring(startindex+2, endindex);
 
-    public JsonObject json;
-
-    public Set<String> types = new HashSet<>();
-
-    List<VersionResource> versions = new ArrayList<>();
-
-    public LauncherData(JsonElement el) throws IOException {
-        JsonArray arr = el.getAsJsonObject().getAsJsonArray("versions");
-        arr.forEach(ver -> versions.add(new VersionResource(ver.getAsJsonObject())));
-    }
-
-    public VersionResource getVersion(String id){
-        for(VersionResource res : versions){
-            if(res.id.equals(id)){
-                return res;
+            if(params.containsKey(key)) {
+                result = result.substring(0, startindex) +
+                        params.get(key) +
+                        result.substring(endindex + 1, result.length());
             }
         }
-        return null;
+        return result;
     }
 }

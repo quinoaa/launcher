@@ -22,35 +22,39 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource;
+package fr.quinoaa.launcherr.resource.download.version;
 
-import fr.quinoaa.launcherr.data.LauncherData;
-import fr.quinoaa.launcherr.data.Provider;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import fr.quinoaa.launcherr.resource.DownloadResource;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ManifestResource extends JsonResource<LauncherData> {
-    public static final String MANIFEST_URI = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
+public class ClassifierResource extends DownloadResource {
+    List<String> excludes = new ArrayList<>();
 
-    public ManifestResource() {
-        super(MANIFEST_URI, null, Paths.get("launcher_manifest_v2.json"), -1);
+    public ClassifierResource(JsonObject parent, JsonObject download, String name) {
+        super(download.get("url").getAsString(),
+                download.get("sha1").getAsString(),
+                Paths.get("libraries", download.get("path").getAsString()),
+                download.get("size").getAsLong());
+
+        if(!parent.has("extract")) return;
+        JsonObject extract = parent.getAsJsonObject("extract");
+
+        if(extract.has("exclude")){
+            for(JsonElement el : extract.getAsJsonArray("exclude")){
+                excludes.add(el.getAsString());
+            }
+        }
     }
 
-    long expire = 1000 * 60 * 10;
-    @Override
-    public boolean isValid(Path root) throws IOException {
-        long age = System.currentTimeMillis() - Files.getLastModifiedTime(getPath(root)).toMillis();
-        if(age < 0) return false;
-
-        return age < expire;
-    }
-
-
-    @Override
-    public Provider getReader() {
-        return LauncherData::new;
+    public boolean shouldExtract(String path){
+        for(String start : excludes){
+            if(path.startsWith(start)) return false;
+        }
+        return true;
     }
 }

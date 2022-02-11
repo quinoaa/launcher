@@ -22,30 +22,25 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource;
+package fr.quinoaa.launcherr.resource.download.version;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import fr.quinoaa.launcherr.data.Provider;
+import fr.quinoaa.launcherr.data.version.VersionData;
+import fr.quinoaa.launcherr.resource.download.JsonResource;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-public abstract class JsonResource<T> extends Resource {
-    public JsonResource(String url, String hash, Path relative, long size) {
-        super(url, hash, relative, size);
+public class CustomVersionResource extends JsonResource<VersionData> {
+    public CustomVersionResource(Path path) {
+        super(null,
+                null,
+                path,
+                -1);
+
     }
 
-    public abstract Provider<T> getReader();
-
-    public T read(Path root) throws IOException {
-        Reader reader = new InputStreamReader(Files.newInputStream(getPath(root)));
-        JsonElement json = new Gson().fromJson(reader, JsonObject.class);
-        return getReader().read(json);
+    @Override
+    public Provider<VersionData> getReader() {
+        return VersionData::new;
     }
-
 }

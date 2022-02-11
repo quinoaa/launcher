@@ -22,42 +22,32 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.data;
+package fr.quinoaa.launcherr.resource;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.resource.download.version.VersionResource;
+import fr.quinoaa.launcherr.util.FileUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class LauncherData {
-    public static final String TYPE_ALPHA = "old_alpha";
-    public static final String TYPE_BETA = "old_beta";
-    public static final String TYPE_RELEASE = "release";
-    public static final String TYPE_SNAPSHOT = "snapshot";
+public class DownloadResource extends Resource {
+    public final String url;
+    public final String hash;
+    public final long size;
 
-    public JsonObject json;
-
-    public Set<String> types = new HashSet<>();
-
-    List<VersionResource> versions = new ArrayList<>();
-
-    public LauncherData(JsonElement el) throws IOException {
-        JsonArray arr = el.getAsJsonObject().getAsJsonArray("versions");
-        arr.forEach(ver -> versions.add(new VersionResource(ver.getAsJsonObject())));
+    public DownloadResource(String url, String hash, Path relative, long size) {
+        super(relative);
+        this.url = url;
+        this.hash = hash;
+        this.size = size;
     }
 
-    public VersionResource getVersion(String id){
-        for(VersionResource res : versions){
-            if(res.id.equals(id)){
-                return res;
-            }
-        }
-        return null;
+    public boolean isValid(Path root) throws IOException {
+        Path file = getPath(root);
+
+        if(size != -1 && Files.size(file) != size) return false;
+        if(hash == null) return true;
+
+        return FileUtil.check(file, hash);
     }
 }

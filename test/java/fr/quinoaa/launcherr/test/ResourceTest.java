@@ -24,24 +24,32 @@
 
 package fr.quinoaa.launcherr.test;
 
-import fr.quinoaa.launcherr.data.version.LibrariesData;
-import fr.quinoaa.launcherr.download.Downloader;
-import fr.quinoaa.launcherr.resource.Resource;
-import fr.quinoaa.launcherr.resource.version.AssetIndexResource;
-import fr.quinoaa.launcherr.resource.ManifestResource;
-import fr.quinoaa.launcherr.resource.version.VersionResource;
-import fr.quinoaa.launcherr.data.version.AssetIndexData;
 import fr.quinoaa.launcherr.data.LauncherData;
+import fr.quinoaa.launcherr.data.version.AssetIndexData;
+import fr.quinoaa.launcherr.data.version.LibrariesData;
 import fr.quinoaa.launcherr.data.version.VersionData;
+import fr.quinoaa.launcherr.download.Downloader;
+import fr.quinoaa.launcherr.launch.GameParameters;
+import fr.quinoaa.launcherr.launch.JVMParameters;
+import fr.quinoaa.launcherr.launch.JavaSettings;
+import fr.quinoaa.launcherr.launch.LaunchWrapper;
+import fr.quinoaa.launcherr.resource.download.ManifestResource;
+import fr.quinoaa.launcherr.resource.download.version.AssetIndexResource;
+import fr.quinoaa.launcherr.resource.download.version.VersionResource;
+import fr.quinoaa.launcherr.resource.extract.NativeResource;
+import fr.quinoaa.launcherr.util.ZipUtil;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 
 public class ResourceTest {
     Path root = new File("").toPath();
+    Path game = new File("game").toPath();
 
     Logger logger = Logger.getGlobal();
 
@@ -49,6 +57,8 @@ public class ResourceTest {
 
     @Test
     public void test() throws Exception {
+        Files.createDirectories(game);
+
         ManifestResource manifest = new ManifestResource();
 
         Downloader dl = new Downloader(manifest);
@@ -56,7 +66,7 @@ public class ResourceTest {
 
 
         LauncherData launcherData = manifest.read(root);
-        VersionResource ver = launcherData.getVersion("1.8");
+        VersionResource ver = launcherData.getVersion("1.13.2");
 
         dl = new Downloader(ver);
         dl.download(root);
@@ -76,6 +86,36 @@ public class ResourceTest {
         dl.download(root);
         dl = new Downloader(libs.classifiers);
         dl.download(root);
+
+        dl = new Downloader(verdata.client);
+        dl.download(root);
+
+        LaunchWrapper wrapper = new LaunchWrapper(verdata.launchData);
+        GameParameters gameParameters = new GameParameters(verdata, root, game);
+        gameParameters.setUserName("chocolat");
+        gameParameters.setAccessToken("a");
+        gameParameters.setUuid(UUID.randomUUID());
+        gameParameters.setXuid(1);
+        gameParameters.setUserType("mojang");
+        gameParameters.setClientId("clientid");
+        JVMParameters jvmParameters = new JVMParameters(verdata, root, NativeResource.getRelativePath(game));
+        jvmParameters.setLauncherName("test");
+        jvmParameters.setLauncherVersion("0");
+        try{
+            for(NativeResource res : verdata.libraries.natives){
+                ZipUtil.unzip(res.zip.getPath(root), res.getPath(game), res.exclude);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        JavaSettings settings = new JavaSettings("java");
+
+        try{
+            wrapper.launch(gameParameters, jvmParameters, settings);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 
