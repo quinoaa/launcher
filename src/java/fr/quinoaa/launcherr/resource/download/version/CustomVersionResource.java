@@ -24,25 +24,48 @@
 
 package fr.quinoaa.launcherr.resource.download.version;
 
+import com.google.gson.JsonObject;
 import fr.quinoaa.launcherr.data.Provider;
+import fr.quinoaa.launcherr.data.VersionListData;
 import fr.quinoaa.launcherr.data.version.VersionData;
+import fr.quinoaa.launcherr.download.Downloader;
 import fr.quinoaa.launcherr.resource.download.JsonResource;
+import fr.quinoaa.launcherr.util.JsonUtil;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class CustomVersionResource extends JsonResource<VersionData> {
-    public CustomVersionResource(Path path) {
-        this(path, null);
+    VersionListData versionlist;
+
+    public CustomVersionResource(Path path, VersionListData versionlist) {
+        this(path, null, versionlist);
     }
-    public CustomVersionResource(Path path, String url) {
+    public CustomVersionResource(Path path, String url, VersionListData versionlist) {
         super(url,
                 null,
                 path,
                 -1);
+        this.versionlist = versionlist;
     }
 
     @Override
     public Provider<VersionData> getReader() {
         return VersionData::new;
+    }
+
+    @Override
+    public VersionData read(Path root) throws IOException {
+        JsonObject replace = readJson(root);
+        if(!replace.has("inheritsFrom")) return getReader().read(replace);
+        String inherits = replace.get("inheritsFrom").getAsString();
+
+        VersionResource version = versionlist.getVersion(inherits);
+        Downloader.download(root, version);
+        JsonObject original = version.readJson(root);
+
+        original = JsonUtil.mergeJson(original, replace).getAsJsonObject();
+
+        return getReader().read(original);
     }
 }

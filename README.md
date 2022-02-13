@@ -45,6 +45,7 @@ launcher.downloadDatas(data);
 
 ### 3 - Authentication
 TODO
+(but you have to create a User object and provide the informations)
 
 ### 4 - Launching game
 First, indicate the java's command:

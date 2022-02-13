@@ -27,6 +27,7 @@ package fr.quinoaa.launcherr.resource.download.version;
 import com.google.gson.JsonObject;
 import fr.quinoaa.launcherr.resource.DownloadResource;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ArtifactResource extends DownloadResource {
@@ -34,7 +35,11 @@ public class ArtifactResource extends DownloadResource {
     public ArtifactResource(JsonObject obj) {
         super(obj.get("url").getAsString(),
                 obj.get("sha1").getAsString(),
-                Paths.get("libraries", obj.get("path").getAsString()),
+                getLibraryFolder().resolve(obj.get("path").getAsString()),
                 obj.get("size").getAsLong());
+    }
+
+    public static Path getLibraryFolder(){
+        return Paths.get("libraries");
     }
 }

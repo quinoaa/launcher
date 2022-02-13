@@ -25,7 +25,6 @@
 package fr.quinoaa.launcherr.resource.download;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.quinoaa.launcherr.data.Provider;
 import fr.quinoaa.launcherr.resource.DownloadResource;
@@ -43,10 +42,14 @@ public abstract class JsonResource<T> extends DownloadResource {
 
     public abstract Provider<T> getReader();
 
-    public T read(Path root) throws IOException {
+    public JsonObject readJson(Path root) throws IOException {
         Reader reader = new InputStreamReader(Files.newInputStream(getPath(root)));
-        JsonElement json = new Gson().fromJson(reader, JsonObject.class);
-        return getReader().read(json);
+        JsonObject json = new Gson().fromJson(reader, JsonObject.class);
+        reader.close();
+        return json;
+    }
+    public T read(Path root) throws IOException {
+        return getReader().read(readJson(root));
     }
 
 }

@@ -1,7 +1,13 @@
 # Modded version note
-Some mod projects has request on automating the installation.
+To run custom versions, you'll have to create a CustomVersionResource with the path to the file.
+The version can be downloaded when the URL is specified.
 
-## Forge
-Please do not automate the download and installation of Forge.
-Our efforts are supported by ads from the download page.
-If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/
+Then use it like a normal VersionResource.
+
+Some modded versions like forge requires you to use their installer (see [Forge section](#forge))
+
+## <a name="forge"></a>Forge
+    Please do not automate the download and installation of Forge.
+    Our efforts are supported by ads from the download page.
+    If you MUST automate this, please consider supporting the project through https://www.patreon.com/LexManos/
+For the forge installer to work, you'll have to create `launcher_profiles.json` inside your game files folder with at least `{}` inside or any valid json.

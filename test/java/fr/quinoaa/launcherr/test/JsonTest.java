@@ -24,16 +24,23 @@
 
 package fr.quinoaa.launcherr.test;
 
-import fr.quinoaa.launcherr.auth.flow.MSAuthFlow;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import fr.quinoaa.launcherr.util.JsonUtil;
 import org.junit.jupiter.api.Test;
 
-public class AuthTest {
-    //@Test
-    public void testMS(){
-        try{
-            MSAuthFlow flow = new MSAuthFlow();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+public class JsonTest {
+    String json1 = "{'aa':'aa','b':'aaa','lol':{'a':1,'b':2},'arr':['a','b']}";
+    String json2 = "{'b':'b','lol':{'a':5},'arr':['c','d']}";
+    @Test
+    public void test(){
+        Gson gson = new Gson();
+
+        JsonObject obj1 = gson.fromJson(json1, JsonObject.class);
+        JsonObject obj2 = gson.fromJson(json2, JsonObject.class);
+
+        JsonElement el = JsonUtil.mergeJson(obj1, obj2);
+        System.out.println(el.toString());
     }
 }

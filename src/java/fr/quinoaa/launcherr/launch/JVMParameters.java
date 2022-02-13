@@ -35,6 +35,10 @@ public class JVMParameters extends LaunchParameters {
     public JVMParameters(VersionData data, Path gamefiles, Path natives) {
         params.put("natives_directory", natives.toAbsolutePath().toString());
         params.put("classpath", getDependencies(data, gamefiles));
+        params.put("classpath_separator", OsUtil.getJarSeparator() + "");
+        params.put("library_directory", gamefiles.resolve(ArtifactResource.getLibraryFolder()).
+                toAbsolutePath().toString());
+        params.put("version_name", data.id);
     }
 
     private String getDependencies(VersionData data, Path gamefiles){

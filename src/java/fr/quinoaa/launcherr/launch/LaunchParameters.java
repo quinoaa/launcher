@@ -33,16 +33,15 @@ public class LaunchParameters implements LaunchWrapper.ParameterProvider {
     @Override
     public String replaceArgument(String value) {
         String result = value;
-        if(result.contains("${")&&result.contains("}")){
+        while(result.contains("${")&&result.contains("}")){
             int startindex = result.indexOf("${");
             int endindex = result.indexOf("}");
             String key = result.substring(startindex+2, endindex);
 
-            if(params.containsKey(key)) {
-                result = result.substring(0, startindex) +
-                        params.get(key) +
-                        result.substring(endindex + 1, result.length());
-            }
+            String param = params.containsKey(key) ? params.get(key) : "null";
+            result = result.substring(0, startindex) +
+                    param +
+                    result.substring(endindex + 1, result.length());
         }
         return result;
     }

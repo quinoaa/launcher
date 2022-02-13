@@ -27,11 +27,10 @@ package fr.quinoaa.launcherr.test;
 import fr.quinoaa.launcherr.Launcher;
 import fr.quinoaa.launcherr.LauncherParameters;
 import fr.quinoaa.launcherr.auth.User;
-import fr.quinoaa.launcherr.data.VersionListData;
 import fr.quinoaa.launcherr.data.version.VersionData;
 import fr.quinoaa.launcherr.launch.JavaSettings;
 import fr.quinoaa.launcherr.launch.LaunchWrapper;
-import fr.quinoaa.launcherr.resource.download.version.VersionResource;
+import fr.quinoaa.launcherr.resource.download.version.CustomVersionResource;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -39,31 +38,33 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-public class LauncherTest {
+public class CustomVersionTest {
     Path files = Paths.get("artifacts");
-    Path games = Paths.get("game");
+    Path game = Paths.get("game");
 
-    //@Test
-    public void testLauncher() throws IOException {
+    User user = new User("caca", "a", "a", UUID.nameUUIDFromBytes
+            ("abcd".getBytes()), 1, "mojang");
+    @Test
+    public void test() throws IOException {
+        Launcher launcher = new Launcher(files, game);
+
+        CustomVersionResource custom = new CustomVersionResource(Paths.get("forge.json"),
+                launcher.getVersionList());
+
         try{
-            Launcher launcher = new Launcher(files, games);
+            VersionData versionData = launcher.queryVersionData(custom);
+            launcher.downloadDatas(versionData);
 
-            VersionListData versions = launcher.getVersionList();
-            VersionResource version = versions.getVersion("1.13.2");
-            // It doesn't need jre 16/17 and has new arguments
+            LauncherParameters params = launcher.createLaunchParameters(user, versionData, new JavaSettings
+                    ("C:\\Program Files\\Semeru\\jdk-17.0.1.12-openj9\\bin\\java.exe"));
+            LaunchWrapper wrap = launcher.prepareLaunch(versionData, params);
 
-            VersionData data = launcher.queryVersionData(version);
-
-            launcher.downloadDatas(data);
-
-            User user = new User("caca", "a", "a", UUID.nameUUIDFromBytes
-                    ("abcd".getBytes()), 1, "mojang");
-            LauncherParameters params = launcher.createLaunchParameters(user, data, new JavaSettings("java"));
-            LaunchWrapper wrap = launcher.prepareLaunch(data, params);
             wrap.launch();
         }catch (Exception e){
             e.printStackTrace();
         }
+
+
 
     }
 }
