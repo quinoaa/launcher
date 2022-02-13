@@ -31,17 +31,18 @@ import fr.quinoaa.launcherr.util.ZipUtil;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class LaunchWrapper {
     LaunchData data;
     ParameterProvider gameargs;
     ParameterProvider jvmargs;
     JavaSettings settings;
-    Path root;
-    Path game;
+    Path rootdir;
+    Path gamedir;
 
     Map<String, Boolean> features = new HashMap<>();
+
+    Process process;
 
     public LaunchWrapper(LaunchData data, ParameterProvider gameargs, ParameterProvider jvmargs,
                          JavaSettings settings, Path root, Path game){
@@ -49,8 +50,8 @@ public class LaunchWrapper {
         this.gameargs = gameargs;
         this.jvmargs = jvmargs;
         this.settings = settings;
-        this.root = root;
-        this.game = game;
+        this.rootdir = root;
+        this.gamedir = game;
     }
 
     public void setFeatures(Map<String, Boolean> features){
@@ -63,7 +64,7 @@ public class LaunchWrapper {
 
     public void prepareNatives() throws IOException {
         for(NativeResource res : data.version.libraries.natives){
-            ZipUtil.unzip(res.zip.getPath(root), res.getPath(game), res.exclude);
+            ZipUtil.unzip(res.zip.getPath(rootdir), res.getPath(gamedir), res.exclude);
         }
     }
 
@@ -84,10 +85,13 @@ public class LaunchWrapper {
             return str;
         });
 
-        Logger.getGlobal().warning(String.join(" ", command));
         ProcessBuilder pb = new ProcessBuilder().command(command);
-        pb.inheritIO();
-        Process p = pb.start();
+        pb.directory(this.gamedir.toFile());
+        this.process = pb.start();
+    }
+
+    public Process getProcess(){
+        return process;
     }
 
 

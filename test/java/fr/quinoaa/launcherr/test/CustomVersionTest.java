@@ -31,6 +31,7 @@ import fr.quinoaa.launcherr.data.version.VersionData;
 import fr.quinoaa.launcherr.launch.JavaSettings;
 import fr.quinoaa.launcherr.launch.LaunchWrapper;
 import fr.quinoaa.launcherr.resource.download.version.CustomVersionResource;
+import fr.quinoaa.launcherr.resource.download.version.VersionResource;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -48,7 +49,16 @@ public class CustomVersionTest {
     public void test() throws IOException {
         Launcher launcher = new Launcher(files, game);
 
-        CustomVersionResource custom = new CustomVersionResource(Paths.get("forge.json"),
+
+        /*
+        VersionResource v = launcher.getVersionList().getVersion("1.12.2");
+
+        VersionData data = launcher.queryVersionData(v);
+        launcher.downloadDatas(data);
+
+*/
+
+        CustomVersionResource custom = new CustomVersionResource(Paths.get("versions/1.12.2-forge-14.23.5.2859/1.12.2-forge-14.23.5.2859.json"),
                 launcher.getVersionList());
 
         try{
@@ -56,13 +66,15 @@ public class CustomVersionTest {
             launcher.downloadDatas(versionData);
 
             LauncherParameters params = launcher.createLaunchParameters(user, versionData, new JavaSettings
-                    ("C:\\Program Files\\Semeru\\jdk-17.0.1.12-openj9\\bin\\java.exe"));
+                    ("java"));
             LaunchWrapper wrap = launcher.prepareLaunch(versionData, params);
 
             wrap.launch();
         }catch (Exception e){
             e.printStackTrace();
         }
+
+
 
 
 

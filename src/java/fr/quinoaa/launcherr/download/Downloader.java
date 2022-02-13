@@ -37,15 +37,22 @@ import java.util.concurrent.BlockingQueue;
 public class Downloader {
     DownloadResource[] resources;
     BlockingQueue<DownloadResource> queue;
+    final DownloadProgress progress;
 
     public Downloader(DownloadResource... resources){
         this.resources = resources;
 
         if(resources.length == 0){
+            progress = new DownloadProgress(0, 0);
             queue = new ArrayBlockingQueue<>(1);
             return;
         }
 
+        long totalsize = 0;
+        for(DownloadResource res : resources){
+            if(res.size != -1) totalsize += res.size;
+        }
+        progress = new DownloadProgress(resources.length, totalsize);
         queue = new ArrayBlockingQueue<>(resources.length, false, Arrays.asList(resources));
     }
 
@@ -65,6 +72,9 @@ public class Downloader {
         }
     }
 
+    public DownloadProgress getProgress(){
+        return progress;
+    }
 
     public static void download(Path root, DownloadResource... resources) throws IOException {
         Downloader dl = new Downloader(resources);
