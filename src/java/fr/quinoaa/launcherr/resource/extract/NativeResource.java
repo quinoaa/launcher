@@ -40,6 +40,6 @@ public class NativeResource extends ExtractResource {
     }
 
     public static Path getRelativePath(Path path){
-        return getRelativePath().resolve("natives");
+        return path.resolve(getRelativePath());
     }
 }

@@ -22,11 +22,13 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.launch;
+package fr.quinoaa.launcherr.launch.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import fr.quinoaa.launcherr.data.version.VersionData;
+import fr.quinoaa.launcherr.launch.LaunchWrapper;
 import fr.quinoaa.launcherr.util.RuleUtil;
 
 import java.util.ArrayList;
@@ -34,16 +36,24 @@ import java.util.List;
 import java.util.Map;
 
 public class LaunchData {
-    JsonArray gameargs;
-    JsonArray jvmargs;
+    public final VersionData version;
+    public JsonArray gameargs = null;
+    public JsonArray jvmargs = null;
 
-    String mainclass;
+    public String mainclass = null;
 
-    public LaunchData(JsonObject arguments, JsonObject root){
+    public LaunchData(JsonObject root, VersionData version) {
+        this.version = version;
+
+        JsonObject arguments = root.getAsJsonObject("arguments");
         this.jvmargs = arguments.getAsJsonArray("jvm");
         this.gameargs = arguments.getAsJsonArray("game");
 
         mainclass = root.get("mainClass").getAsString();
+    }
+
+    LaunchData(VersionData version){
+        this.version = version;
     }
 
     public List<String> parseGameArgs(Map<String, Boolean> features, LaunchWrapper.ParameterProvider settings){
@@ -80,10 +90,12 @@ public class LaunchData {
         return arguments;
     }
 
-    public static LaunchData get(JsonObject version){
+    public static LaunchData get(JsonObject versionjson, VersionData version){
 
-        if(version.has("arguments"))
-            return new LaunchData(version.getAsJsonObject("arguments"), version);
+        if(versionjson.has("arguments"))
+            return new LaunchData(versionjson, version);
+        if(versionjson.has("minecraftArguments"))
+            return new LegacyLaunchData(versionjson, version);
 
         return null;
     }

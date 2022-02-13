@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LaunchParameters implements LaunchWrapper.ParameterProvider {
-    Map<String, String> params = new HashMap<>();
+    public Map<String, String> params = new HashMap<>();
 
     @Override
     public String replaceArgument(String value) {

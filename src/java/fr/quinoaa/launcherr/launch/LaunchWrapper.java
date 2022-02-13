@@ -24,24 +24,50 @@
 
 package fr.quinoaa.launcherr.launch;
 
-import java.io.File;
+import fr.quinoaa.launcherr.launch.data.LaunchData;
+import fr.quinoaa.launcherr.resource.extract.NativeResource;
+import fr.quinoaa.launcherr.util.ZipUtil;
+
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class LaunchWrapper {
     LaunchData data;
+    ParameterProvider gameargs;
+    ParameterProvider jvmargs;
+    JavaSettings settings;
+    Path root;
+    Path game;
 
-    public LaunchWrapper(LaunchData data){
+    Map<String, Boolean> features = new HashMap<>();
+
+    public LaunchWrapper(LaunchData data, ParameterProvider gameargs, ParameterProvider jvmargs,
+                         JavaSettings settings, Path root, Path game){
         this.data = data;
+        this.gameargs = gameargs;
+        this.jvmargs = jvmargs;
+        this.settings = settings;
+        this.root = root;
+        this.game = game;
     }
 
-    public void launch(ParameterProvider args, ParameterProvider jvm, JavaSettings settings) throws IOException {
-        launch(args, jvm, settings, new HashMap<>());
+    public void setFeatures(Map<String, Boolean> features){
+        this.features = features;
     }
 
-    public void launch(ParameterProvider gameargs, ParameterProvider jvmargs, JavaSettings settings,
-                       Map<String, Boolean> features) throws IOException {
+    public void setFeature(String key, boolean value){
+        features.put(key, value);
+    }
+
+    public void prepareNatives() throws IOException {
+        for(NativeResource res : data.version.libraries.natives){
+            ZipUtil.unzip(res.zip.getPath(root), res.getPath(game), res.exclude);
+        }
+    }
+
+    public void launch() throws IOException {
         List<String> jvm = data.parseJVMArgs(features, jvmargs);
         List<String> game = data.parseGameArgs(features, gameargs);
 
@@ -54,23 +80,14 @@ public class LaunchWrapper {
         command.addAll(game);
 
         command.replaceAll(str->{
-            if(str.contains(" ")) return '"' + str + '"';
+            if(str.contains(" ") || str.contains(".")) return '"' + str + '"';
             return str;
         });
 
-
         Logger.getGlobal().warning(String.join(" ", command));
         ProcessBuilder pb = new ProcessBuilder().command(command);
-        pb.redirectOutput(new File("output.txt"));
-        pb.redirectError(new File("error.txt"));
+        pb.inheritIO();
         Process p = pb.start();
-        while(p.isAlive()) {
-            try {
-                Thread.sleep(110);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
 

@@ -26,7 +26,7 @@ package fr.quinoaa.launcherr.data.version;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fr.quinoaa.launcherr.launch.LaunchData;
+import fr.quinoaa.launcherr.launch.data.LaunchData;
 import fr.quinoaa.launcherr.resource.download.version.AssetIndexResource;
 import fr.quinoaa.launcherr.resource.download.version.ClientResource;
 
@@ -45,7 +45,7 @@ public class VersionData {
         JsonObject base = jsonElement.getAsJsonObject();
 
         id = base.get("id").getAsString();
-        launchData = LaunchData.get(base);
+        launchData = LaunchData.get(base, this);
 
         if(base.has("assets"))
             assets = new AssetIndexResource(base.getAsJsonObject("assetIndex"));

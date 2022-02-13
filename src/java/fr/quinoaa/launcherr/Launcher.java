@@ -24,6 +24,86 @@
 
 package fr.quinoaa.launcherr;
 
-public class Launcher {
+import fr.quinoaa.launcherr.auth.User;
+import fr.quinoaa.launcherr.data.VersionListData;
+import fr.quinoaa.launcherr.data.version.AssetIndexData;
+import fr.quinoaa.launcherr.data.version.VersionData;
+import fr.quinoaa.launcherr.download.Downloader;
+import fr.quinoaa.launcherr.launch.JavaSettings;
+import fr.quinoaa.launcherr.launch.LaunchWrapper;
+import fr.quinoaa.launcherr.resource.DownloadResource;
+import fr.quinoaa.launcherr.resource.download.JsonResource;
+import fr.quinoaa.launcherr.resource.download.ManifestResource;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Launcher {
+    public final Path gamefiles;
+    public final Path savefiles;
+
+    public Launcher(Path gamefiles, Path savefiles){
+        this.gamefiles = gamefiles;
+        this.savefiles = savefiles;
+    }
+
+
+    ManifestResource versionmanifest = new ManifestResource();
+    VersionListData versions = null;
+
+    public VersionListData getVersionList(boolean update) throws IOException {
+        if(versions != null) return versions;
+
+        if(update){
+            Downloader.download(gamefiles, versionmanifest);
+        }
+
+        return (versions = versionmanifest.read(gamefiles));
+    }
+    public VersionListData getVersionList() throws IOException {
+        return getVersionList(true);
+    }
+
+
+
+    public VersionData queryVersionData(JsonResource<VersionData> version) throws IOException {
+        if(version.url == null) return queryVersionData(version, false);
+        return queryVersionData(version, true);
+    }
+    public VersionData queryVersionData(JsonResource<VersionData> version, boolean update) throws IOException {
+        if(update){
+            Downloader.download(gamefiles, version);
+        }
+
+        return version.read(gamefiles);
+    }
+
+    public void downloadDatas(VersionData versiondata) throws IOException {
+        Downloader.download(gamefiles, versiondata.assets);
+
+        AssetIndexData index = versiondata.assets.read(gamefiles);
+
+        List<DownloadResource> downloads = new ArrayList<>();
+        downloads.add(versiondata.client);
+        downloads.addAll(Arrays.asList(versiondata.libraries.artifacts));
+        downloads.addAll(Arrays.asList(versiondata.libraries.classifiers));
+        downloads.addAll(Arrays.asList(index.assets));
+
+        Downloader dl = new Downloader(downloads.toArray(new DownloadResource[0]));
+        dl.download(gamefiles);
+    }
+
+    public LauncherParameters createLaunchParameters(User user, VersionData version, JavaSettings java){
+        return new LauncherParameters(user, version, java, this);
+    }
+    public LaunchWrapper prepareLaunch(VersionData data, LauncherParameters params) throws IOException {
+        LaunchWrapper wrapper = new LaunchWrapper(data.launchData, params.gameparams, params.jvmparams,
+                params.java, gamefiles, savefiles);
+
+        wrapper.prepareNatives();
+        return wrapper;
+    }
 }

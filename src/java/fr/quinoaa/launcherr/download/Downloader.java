@@ -65,6 +65,11 @@ public class Downloader {
         }
     }
 
+
+    public static void download(Path root, DownloadResource... resources) throws IOException {
+        Downloader dl = new Downloader(resources);
+        dl.download(root);
+    }
 }
 
 

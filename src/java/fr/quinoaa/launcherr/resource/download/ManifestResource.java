@@ -24,7 +24,7 @@
 
 package fr.quinoaa.launcherr.resource.download;
 
-import fr.quinoaa.launcherr.data.LauncherData;
+import fr.quinoaa.launcherr.data.VersionListData;
 import fr.quinoaa.launcherr.data.Provider;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ManifestResource extends JsonResource<LauncherData> {
+public class ManifestResource extends JsonResource<VersionListData> {
     public static final String MANIFEST_URI = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 
     public ManifestResource() {
@@ -42,7 +42,10 @@ public class ManifestResource extends JsonResource<LauncherData> {
     long expire = 1000 * 60 * 10;
     @Override
     public boolean isValid(Path root) throws IOException {
-        long age = System.currentTimeMillis() - Files.getLastModifiedTime(getPath(root)).toMillis();
+        Path file = getPath(root);
+        if(Files.size(file) == 0) return false;
+
+        long age = System.currentTimeMillis() - Files.getLastModifiedTime(file).toMillis();
         if(age < 0) return false;
 
         return age < expire;
@@ -50,7 +53,7 @@ public class ManifestResource extends JsonResource<LauncherData> {
 
 
     @Override
-    public Provider<LauncherData> getReader() {
-        return LauncherData::new;
+    public Provider<VersionListData> getReader() {
+        return VersionListData::new;
     }
 }

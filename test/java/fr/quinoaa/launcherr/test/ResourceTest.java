@@ -24,7 +24,7 @@
 
 package fr.quinoaa.launcherr.test;
 
-import fr.quinoaa.launcherr.data.LauncherData;
+import fr.quinoaa.launcherr.data.VersionListData;
 import fr.quinoaa.launcherr.data.version.AssetIndexData;
 import fr.quinoaa.launcherr.data.version.LibrariesData;
 import fr.quinoaa.launcherr.data.version.VersionData;
@@ -55,7 +55,7 @@ public class ResourceTest {
 
 
 
-    @Test
+    //@Test
     public void test() throws Exception {
         Files.createDirectories(game);
 
@@ -65,7 +65,7 @@ public class ResourceTest {
         dl.download(root);
 
 
-        LauncherData launcherData = manifest.read(root);
+        VersionListData launcherData = manifest.read(root);
         VersionResource ver = launcherData.getVersion("1.13.2");
 
         dl = new Downloader(ver);
@@ -89,7 +89,7 @@ public class ResourceTest {
 
         dl = new Downloader(verdata.client);
         dl.download(root);
-
+/*
         LaunchWrapper wrapper = new LaunchWrapper(verdata.launchData);
         GameParameters gameParameters = new GameParameters(verdata, root, game);
         gameParameters.setUserName("chocolat");
@@ -116,6 +116,8 @@ public class ResourceTest {
         }catch(Exception e){
             e.printStackTrace();
         }
+        /*
+ */
     }
 
 

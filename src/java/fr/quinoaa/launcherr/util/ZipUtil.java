@@ -26,10 +26,10 @@ package fr.quinoaa.launcherr.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -39,8 +39,6 @@ public class ZipUtil {
         ZipInputStream zis = new ZipInputStream(is);
 
         ZipEntry entry;
-        byte[] buff = new byte[1024*8];
-        int read;
         while((entry = zis.getNextEntry())!=null){
             boolean excluded = false;
             for(String s : exclude) {
@@ -59,11 +57,7 @@ public class ZipUtil {
 
             if(!Files.exists(file)) Files.createFile(file);
 
-            OutputStream os = Files.newOutputStream(file);
-            while((read = zis.read(buff)) != -1){
-                os.write(read);
-            }
-            os.close();
+            Files.copy(zis, file, StandardCopyOption.REPLACE_EXISTING);
         }
 
         zis.close();

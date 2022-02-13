@@ -30,12 +30,9 @@ import com.google.gson.JsonObject;
 import fr.quinoaa.launcherr.resource.download.version.VersionResource;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class LauncherData {
+public class VersionListData {
     public static final String TYPE_ALPHA = "old_alpha";
     public static final String TYPE_BETA = "old_beta";
     public static final String TYPE_RELEASE = "release";
@@ -47,9 +44,10 @@ public class LauncherData {
 
     List<VersionResource> versions = new ArrayList<>();
 
-    public LauncherData(JsonElement el) throws IOException {
+    public VersionListData(JsonElement el) throws IOException {
         JsonArray arr = el.getAsJsonObject().getAsJsonArray("versions");
         arr.forEach(ver -> versions.add(new VersionResource(ver.getAsJsonObject())));
+        versions = Collections.unmodifiableList(versions);
     }
 
     public VersionResource getVersion(String id){
@@ -59,5 +57,9 @@ public class LauncherData {
             }
         }
         return null;
+    }
+
+    public List<VersionResource> getAllVersions(){
+        return versions;
     }
 }

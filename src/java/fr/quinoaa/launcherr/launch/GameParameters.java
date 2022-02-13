@@ -39,6 +39,7 @@ public class GameParameters extends LaunchParameters {
         params.put("game_directory", gamedir.toAbsolutePath().toString());
         params.put("assets_root", version.assets.assetFolder.getPath(resources).toAbsolutePath().toString());
         params.put("assets_index_name", version.assets.id);
+        params.put("user_properties", "{}");
 
         setVersionType(version.type);
     }

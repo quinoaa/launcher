@@ -22,27 +22,38 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource.download.version;
+package fr.quinoaa.launcherr;
 
-import fr.quinoaa.launcherr.data.Provider;
+import fr.quinoaa.launcherr.auth.User;
 import fr.quinoaa.launcherr.data.version.VersionData;
-import fr.quinoaa.launcherr.resource.download.JsonResource;
+import fr.quinoaa.launcherr.launch.GameParameters;
+import fr.quinoaa.launcherr.launch.JVMParameters;
+import fr.quinoaa.launcherr.launch.JavaSettings;
+import fr.quinoaa.launcherr.resource.extract.NativeResource;
 
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
-public class CustomVersionResource extends JsonResource<VersionData> {
-    public CustomVersionResource(Path path) {
-        this(path, null);
-    }
-    public CustomVersionResource(Path path, String url) {
-        super(url,
-                null,
-                path,
-                -1);
+public class LauncherParameters {
+    User user;
+    public JavaSettings java;
+    public JVMParameters jvmparams;
+    public GameParameters gameparams;
+
+    public LauncherParameters(User user, VersionData version, JavaSettings java, Launcher launcher){
+        this.user = user;
+        this.java = java;
+
+        jvmparams = new JVMParameters(version, launcher.gamefiles, NativeResource.getRelativePath(launcher.savefiles));
+        jvmparams.setLauncherVersion("1");
+        jvmparams.setLauncherName("launcher");
+        gameparams = new GameParameters(version, launcher.gamefiles, launcher.savefiles);
+        gameparams.setClientId(user.clientid);
+        gameparams.setUserType(user.usertype);
+        gameparams.setXuid(user.xuid);
+        gameparams.setUuid(user.uuid);
+        gameparams.setAccessToken(user.accesstoken);
+        gameparams.setUserName(user.username);
     }
 
-    @Override
-    public Provider<VersionData> getReader() {
-        return VersionData::new;
-    }
 }

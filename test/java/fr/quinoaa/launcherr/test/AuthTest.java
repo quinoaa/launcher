@@ -22,34 +22,18 @@
  * SOFTWARE.
  */
 
-package fr.quinoaa.launcherr.resource;
+package fr.quinoaa.launcherr.test;
 
-import fr.quinoaa.launcherr.util.FileUtil;
+import fr.quinoaa.launcherr.auth.flow.MSAuthFlow;
+import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-public class DownloadResource extends Resource {
-    public final String url;
-    public final String hash;
-    public final long size;
-
-    public DownloadResource(String url, String hash, Path relative, long size) {
-        super(relative);
-        this.url = url;
-        this.hash = hash;
-        this.size = size;
-    }
-
-    public boolean isValid(Path root) throws IOException {
-        Path file = getPath(root);
-        long filesize = Files.size(file);
-
-        if(filesize == 0) return false;
-        if(size != -1 && filesize != size) return false;
-        if(hash == null) return true;
-
-        return FileUtil.check(file, hash);
+public class AuthTest {
+    @Test
+    public void testMS(){
+        try{
+            MSAuthFlow flow = new MSAuthFlow();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

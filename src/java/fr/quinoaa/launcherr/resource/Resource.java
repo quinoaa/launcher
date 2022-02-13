@@ -34,6 +34,6 @@ public class Resource {
     }
 
     public Path getPath(Path root){
-        return root.resolve(relative);
+        return root.resolve(relative).toAbsolutePath();
     }
 }
