@@ -81,7 +81,7 @@ public class Launcher {
         return version.read(gamefiles);
     }
 
-    public void downloadDatas(VersionData versiondata) throws IOException {
+    public List<DownloadResource> getFilesToDownload(VersionData versiondata) throws IOException {
         Downloader.download(gamefiles, versiondata.assets);
 
         AssetIndexData index = versiondata.assets.read(gamefiles);
@@ -92,6 +92,10 @@ public class Launcher {
         downloads.addAll(Arrays.asList(versiondata.libraries.classifiers));
         downloads.addAll(Arrays.asList(index.assets));
 
+        return downloads;
+    }
+    public void downloadDatas(VersionData versiondata) throws IOException {
+        List<DownloadResource> downloads = getFilesToDownload(versiondata);
         Downloader dl = new Downloader(downloads.toArray(new DownloadResource[0]));
         dl.download(gamefiles);
     }
