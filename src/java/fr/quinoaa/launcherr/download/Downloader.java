@@ -69,6 +69,8 @@ public class Downloader {
             if(!res.isValid(root)){
                 Request.Get(res.url).execute().saveContent(res.getPath(root).toFile());
             }
+            progress.addSize(res.size);
+            progress.addDownload(1);
         }
     }
 

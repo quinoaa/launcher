@@ -28,7 +28,7 @@ public class DownloadProgress {
     public final int totaldownload;
     public final long totalsize;
 
-    private int size;
+    private long size;
     private int download;
 
     public DownloadProgress(int totaldownload, long totalsize){
@@ -37,11 +37,11 @@ public class DownloadProgress {
     }
 
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void addSize(int size) {
+    public void addSize(long size) {
         this.size += size;
     }
 
